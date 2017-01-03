@@ -61,6 +61,7 @@ fn main() {
     let sys = sysinfo::System::new();
     let procs = sys.get_process_list();
     let regs = read_config();
+
     for (pid, proc_) in procs {
         for reg in regs.clone() {
             if reg.is_match(proc_.name.as_str()) {
