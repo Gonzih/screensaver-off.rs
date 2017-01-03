@@ -8,6 +8,9 @@ use regex::Regex;
 use std::fs;
 use std::os::unix::fs::PermissionsExt;
 use std::process::Command;
+use std::env::home_dir;
+use std::fs::{File};
+use std::io::{BufReader, BufRead};
 
 fn is_executable(path: &str) -> bool {
     let meta_maybe = fs::metadata(path);
@@ -38,8 +41,19 @@ fn disable_xscreensaver() {
 }
 
 fn read_config() -> Vec<Regex> {
-    let re = Regex::new("mplayer").unwrap();
-    vec![re]
+    let path = format!("{}/.screensaver-off", home_dir().unwrap().display());
+    let f = File::open(path);
+
+    if !f.is_ok() {
+        return vec![];
+    }
+
+    let buf = BufReader::new(f.unwrap());
+
+    buf.lines().map(|line| {
+        let line = line.unwrap();
+        Regex::new(&line).unwrap()
+    }).collect()
 }
 
 fn main() {
