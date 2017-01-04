@@ -45,15 +45,15 @@ fn read_config() -> Vec<Regex> {
     let f = File::open(path);
 
     if !f.is_ok() {
-        return vec![];
+        vec![]
+    } else {
+        let buf = BufReader::new(f.unwrap());
+
+        buf.lines().map(|line| {
+            let line = line.unwrap();
+            Regex::new(&line).unwrap()
+        }).collect()
     }
-
-    let buf = BufReader::new(f.unwrap());
-
-    buf.lines().map(|line| {
-        let line = line.unwrap();
-        Regex::new(&line).unwrap()
-    }).collect()
 }
 
 fn main() {
