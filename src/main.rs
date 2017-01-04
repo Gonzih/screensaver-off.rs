@@ -67,8 +67,9 @@ fn check_and_disable_screensaver() {
 
     'outer: for (pid, proc_) in procs {
         for reg in regs.clone() {
-            if reg.is_match(proc_.name.as_str()) {
-                info!("Found matching process {} {}", pid, proc_.name);
+            let pname = proc_.name.as_str();
+            if reg.is_match(pname) {
+                info!("Found matching process {} {}", pid, pname);
                 disable_xscreensaver();
                 break 'outer;
             }
