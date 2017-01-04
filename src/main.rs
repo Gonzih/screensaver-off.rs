@@ -60,22 +60,25 @@ fn read_config() -> Vec<Regex> {
     }
 }
 
-fn start_loop() {
-    loop {
-        let sys = sysinfo::System::new();
-        let procs = sys.get_process_list();
-        let regs = read_config();
+fn check_and_disable_screensaver() {
+    let sys = sysinfo::System::new();
+    let procs = sys.get_process_list();
+    let regs = read_config();
 
-        for (pid, proc_) in procs {
-            for reg in regs.clone() {
-                if reg.is_match(proc_.name.as_str()) {
-                    info!("Found matching process {} {}", pid, proc_.name);
-                    disable_xscreensaver();
-                    return;
-                }
+    'outer: for (pid, proc_) in procs {
+        for reg in regs.clone() {
+            if reg.is_match(proc_.name.as_str()) {
+                info!("Found matching process {} {}", pid, proc_.name);
+                disable_xscreensaver();
+                break 'outer;
             }
         }
+    }
+}
 
+fn start_loop() {
+    loop {
+        check_and_disable_screensaver();
         sleep(Duration::from_secs(60));
     }
 }
