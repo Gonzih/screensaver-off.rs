@@ -9,8 +9,10 @@ use std::fs;
 use std::os::unix::fs::PermissionsExt;
 use std::process::Command;
 use std::env::home_dir;
-use std::fs::{File};
+use std::fs::File;
 use std::io::{BufReader, BufRead};
+use std::thread::sleep;
+use std::time::Duration;
 
 fn is_executable(path: &str) -> bool {
     let meta_maybe = fs::metadata(path);
@@ -49,26 +51,36 @@ fn read_config() -> Vec<Regex> {
     } else {
         let buf = BufReader::new(f.unwrap());
 
-        buf.lines().map(|line| {
-            let line = line.unwrap();
-            Regex::new(&line).unwrap()
-        }).collect()
+        buf.lines()
+            .map(|line| {
+                let line = line.unwrap();
+                Regex::new(&line).unwrap()
+            })
+            .collect()
+    }
+}
+
+fn start_loop() {
+    loop {
+        let sys = sysinfo::System::new();
+        let procs = sys.get_process_list();
+        let regs = read_config();
+
+        for (pid, proc_) in procs {
+            for reg in regs.clone() {
+                if reg.is_match(proc_.name.as_str()) {
+                    info!("Found matching process {} {}", pid, proc_.name);
+                    disable_xscreensaver();
+                    return;
+                }
+            }
+        }
+
+        sleep(Duration::from_secs(60));
     }
 }
 
 fn main() {
     env_logger::init().unwrap();
-    let sys = sysinfo::System::new();
-    let procs = sys.get_process_list();
-    let regs = read_config();
-
-    for (pid, proc_) in procs {
-        for reg in regs.clone() {
-            if reg.is_match(proc_.name.as_str()) {
-                info!("Found matching process {} {}", pid, proc_.name);
-                disable_xscreensaver();
-                return;
-            }
-        }
-    }
+    start_loop();
 }
