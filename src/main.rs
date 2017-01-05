@@ -1,9 +1,9 @@
-extern crate sysinfo;
 #[macro_use]
 extern crate log;
 extern crate env_logger;
 extern crate regex;
 extern crate gtk;
+extern crate sysinfo;
 
 use regex::Regex;
 use std::fs;
