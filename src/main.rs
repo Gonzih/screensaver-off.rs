@@ -14,9 +14,21 @@ use std::fs::File;
 use std::io::{BufReader, BufRead};
 use std::thread::sleep;
 use std::time::Duration;
+use gtk::prelude::*;
 use gtk::StatusIcon;
 use std::sync::{Arc, Mutex};
 use std::thread;
+
+const INACTIVE_ICON: &'static str = "caffeine-cup-empty";
+const INACTIVE_TOOLTIP: &'static str = "Disable screensaver";
+const ACTIVE_ICON: &'static str = "caffeine-cup-full";
+const ACTIVE_TOOLTIP: &'static str = "Enable screensaver";
+
+#[derive(Debug)]
+struct AppState {
+    manually_triggered: bool,
+    automatically_triggered: bool,
+}
 
 fn is_executable(path: &str) -> bool {
     let meta_maybe = fs::metadata(path);
@@ -65,16 +77,18 @@ fn read_config() -> Vec<Regex> {
     }
 }
 
-fn check_and_disable_screensaver(state: &Arc<Mutex<bool>>) {
-    let state = state.lock().unwrap();
+fn check_and_disable_screensaver(state: &Arc<Mutex<AppState>>) {
+    let mut state = state.lock().unwrap();
 
-    if *state {
-        info!("Disabling screensaver because forced by global state which is {}", *state);
+    if state.manually_triggered {
+        info!("Disabling screensaver because forced by global state which is {:?}",
+              *state);
         disable_xscreensaver();
     } else {
         let sys = sysinfo::System::new();
         let procs = sys.get_process_list();
         let regs = read_config();
+        state.automatically_triggered = false;
 
         'outer: for (pid, proc_) in procs {
             for reg in regs.clone() {
@@ -82,6 +96,7 @@ fn check_and_disable_screensaver(state: &Arc<Mutex<bool>>) {
                 if reg.is_match(pname) {
                     info!("Found matching process {} {}", pid, pname);
                     disable_xscreensaver();
+                    state.automatically_triggered = true;
                     break 'outer;
                 }
             }
@@ -89,10 +104,32 @@ fn check_and_disable_screensaver(state: &Arc<Mutex<bool>>) {
     }
 }
 
-fn start_loop(state: Arc<Mutex<bool>>) {
+fn start_monitoring_loop(state: Arc<Mutex<AppState>>) {
     loop {
         check_and_disable_screensaver(&state);
         sleep(Duration::from_secs(60));
+    }
+}
+
+fn configure_icon(state: Arc<Mutex<AppState>>, icon: &StatusIcon) {
+    icon.set_tooltip_text(INACTIVE_TOOLTIP);
+    icon.set_visible(true);
+
+    icon.connect_activate(move |i| {
+        let mut state = state.lock().unwrap();
+        state.manually_triggered = !state.manually_triggered;
+        adjust_icon_pic(&state, &i);
+    });
+
+}
+
+fn adjust_icon_pic(state: &AppState, icon: &StatusIcon) {
+    if state.manually_triggered || state.automatically_triggered {
+        icon.set_tooltip_text(ACTIVE_TOOLTIP);
+        icon.set_from_icon_name(ACTIVE_ICON);
+    } else {
+        icon.set_tooltip_text(INACTIVE_TOOLTIP);
+        icon.set_from_icon_name(INACTIVE_ICON);
     }
 }
 
@@ -103,33 +140,26 @@ fn main() {
         panic!("Failed to initialize GTK!");
     }
 
-    let inactive_icon = "caffeine-cup-empty";
-    let inactive_tooltip = "Disable screensaver";
-    let active_icon = "caffeine-cup-full";
-    let active_tooltip = "Enable screensaver";
+    let shared_state = Arc::new(Mutex::new(AppState {
+        manually_triggered: false,
+        automatically_triggered: false,
+    }));
 
-    let global_state = Arc::new(Mutex::new(false));
-    let click_shared_state = global_state.clone();
-    let loop_shared_state = global_state.clone();
+    let icon = StatusIcon::new_from_icon_name(INACTIVE_ICON);
 
-    let icon = StatusIcon::new_from_icon_name(inactive_icon);
-    icon.set_tooltip_text(inactive_tooltip);
-    icon.set_visible(true);
-    icon.connect_activate(move |i| {
-        let mut state = click_shared_state.lock().unwrap();
-        *state = !*state;
+    let state1 = shared_state.clone();
+    configure_icon(state1, &icon);
 
-        if *state {
-            i.set_tooltip_text(active_tooltip);
-            i.set_from_icon_name(active_icon);
-        } else {
-            i.set_tooltip_text(inactive_tooltip);
-            i.set_from_icon_name(inactive_icon);
-        }
+    let state2 = shared_state.clone();
+    thread::spawn(move || {
+        start_monitoring_loop(state2);
     });
 
-    thread::spawn(move || {
-        start_loop(loop_shared_state);
+    let state3 = shared_state.clone();
+    gtk::timeout_add_seconds(1, move || {
+        let state = state3.lock().unwrap();
+        adjust_icon_pic(&state, &icon);
+        Continue(true)
     });
 
     gtk::main();
