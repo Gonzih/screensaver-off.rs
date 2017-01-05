@@ -103,23 +103,28 @@ fn main() {
         panic!("Failed to initialize GTK!");
     }
 
+    let inactive_icon = "caffeine-cup-empty";
+    let inactive_tooltip = "Disable screensaver";
+    let active_icon = "caffeine-cup-full";
+    let active_tooltip = "Enable screensaver";
+
     let global_state = Arc::new(Mutex::new(false));
     let click_shared_state = global_state.clone();
     let loop_shared_state = global_state.clone();
 
-    let icon = StatusIcon::new_from_icon_name("changes-allow");
-    icon.set_tooltip_text("Disable screensaver");
+    let icon = StatusIcon::new_from_icon_name(inactive_icon);
+    icon.set_tooltip_text(inactive_tooltip);
     icon.set_visible(true);
     icon.connect_activate(move |i| {
         let mut state = click_shared_state.lock().unwrap();
         *state = !*state;
 
         if *state {
-            i.set_tooltip_text("Enable screensaver");
-            i.set_from_icon_name("changes-prevent");
+            i.set_tooltip_text(active_tooltip);
+            i.set_from_icon_name(active_icon);
         } else {
-            i.set_tooltip_text("Disable screensaver");
-            i.set_from_icon_name("changes-allow");
+            i.set_tooltip_text(inactive_tooltip);
+            i.set_from_icon_name(inactive_icon);
         }
     });
 
