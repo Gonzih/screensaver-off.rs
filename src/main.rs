@@ -92,7 +92,7 @@ fn check_and_disable_screensaver(state: &Arc<Mutex<bool>>) {
 fn start_loop(state: Arc<Mutex<bool>>) {
     loop {
         check_and_disable_screensaver(&state);
-        sleep(Duration::from_secs(6));
+        sleep(Duration::from_secs(60));
     }
 }
 
