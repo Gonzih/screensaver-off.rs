@@ -5,4 +5,4 @@ RUN pacman -Sy archlinux-keyring pacman --noconfirm
 RUN pacman-db-upgrade
 RUN pacman -Su --noconfirm
 RUN pacman -S gcc rustup cargo make gtk3 --noconfirm
-RUN rustup default nightly
+RUN rustup default stable
