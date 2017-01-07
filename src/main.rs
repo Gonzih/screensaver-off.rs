@@ -91,7 +91,7 @@ fn check_and_disable_screensaver(state: &Arc<Mutex<AppState>>) {
         state.automatically_triggered = false;
 
         'outer: for (pid, proc_) in procs {
-            for reg in regs.clone() {
+            for reg in &regs {
                 let pname = proc_.name.as_str();
                 if reg.is_match(pname) {
                     info!("Found matching process {} {}", pid, pname);
