@@ -17,7 +17,7 @@ source=("${pkgname}::git+https://github.com/Gonzih/screensaver-off.rs.git#tag=v$
 md5sums=('SKIP')
 
 build() {
-  cd "$srcdir/$pkgnahe"
+  cd "$srcdir/$pkgname"
   cargo build --release
 }
 
