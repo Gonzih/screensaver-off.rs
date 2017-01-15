@@ -6,8 +6,6 @@ extern crate gtk;
 extern crate sysinfo;
 
 use regex::Regex;
-use std::fs;
-use std::os::unix::fs::PermissionsExt;
 use std::process::Command;
 use std::env::home_dir;
 use std::fs::File;
@@ -19,6 +17,10 @@ use gtk::StatusIcon;
 use std::sync::{Arc, Mutex};
 use std::thread;
 
+mod sh;
+
+use sh::is_executable;
+
 const INACTIVE_ICON: &'static str = "caffeine-cup-empty";
 const INACTIVE_TOOLTIP: &'static str = "Disable screensaver";
 const ACTIVE_ICON: &'static str = "caffeine-cup-full";
@@ -28,20 +30,6 @@ const ACTIVE_TOOLTIP: &'static str = "Enable screensaver";
 struct AppState {
     manually_triggered: bool,
     automatically_triggered: bool,
-}
-
-fn is_executable(path: &str) -> bool {
-    let meta_maybe = fs::metadata(path);
-
-    if !meta_maybe.is_ok() {
-        return false;
-    }
-
-    let meta = meta_maybe.unwrap();
-    let mode = meta.permissions().mode();
-    let is_executable = mode & 0o111 != 0;
-
-    meta.is_file() && is_executable
 }
 
 fn disable_xscreensaver() {
