@@ -6,7 +6,6 @@ extern crate gtk;
 extern crate sysinfo;
 
 use regex::Regex;
-use std::process::Command;
 use std::env::home_dir;
 use std::fs::File;
 use std::io::{BufReader, BufRead};
@@ -17,9 +16,9 @@ use gtk::StatusIcon;
 use std::sync::{Arc, Mutex};
 use std::thread;
 
-mod sh;
+mod inhibitors;
 
-use sh::is_executable;
+use inhibitors::{disable_all, enable_all};
 
 const INACTIVE_ICON: &'static str = "caffeine-cup-empty";
 const INACTIVE_TOOLTIP: &'static str = "Disable screensaver";
@@ -30,20 +29,6 @@ const ACTIVE_TOOLTIP: &'static str = "Enable screensaver";
 struct AppState {
     manually_triggered: bool,
     automatically_triggered: bool,
-}
-
-fn disable_xscreensaver() {
-    info!("Disabling xscreensaver");
-    let path = "/usr/bin/xscreensaver-command";
-    if is_executable(path) {
-        let status = Command::new(path).arg("-deactivate").status();
-        match status {
-            Ok(v) => info!("Process {} exited with status {}", path, v),
-            Err(err) => warn!("Process {} exited with error \"{}\"", path, err),
-        }
-    } else {
-        warn!("{} is not executable!", path)
-    }
 }
 
 fn read_config() -> Vec<Regex> {
@@ -65,13 +50,14 @@ fn read_config() -> Vec<Regex> {
     }
 }
 
-fn check_and_disable_screensaver(state: &Arc<Mutex<AppState>>) {
+fn check_and_disable(state: &Arc<Mutex<AppState>>) {
     let mut state = state.lock().unwrap();
 
     if state.manually_triggered {
         info!("Disabling screensaver because forced by global state which is {:?}",
               *state);
-        disable_xscreensaver();
+        disable_all();
+        return;
     } else {
         let sys = sysinfo::System::new();
         let procs = sys.get_process_list();
@@ -83,18 +69,20 @@ fn check_and_disable_screensaver(state: &Arc<Mutex<AppState>>) {
                 let pname = proc_.name.as_str();
                 if reg.is_match(pname) {
                     info!("Found matching process {} {}", pid, pname);
-                    disable_xscreensaver();
+                    disable_all();
                     state.automatically_triggered = true;
-                    break 'outer;
+                    return;
                 }
             }
         }
     }
+
+    enable_all();
 }
 
 fn start_monitoring_loop(state: Arc<Mutex<AppState>>) {
     loop {
-        check_and_disable_screensaver(&state);
+        check_and_disable(&state);
         sleep(Duration::from_secs(60));
     }
 }
