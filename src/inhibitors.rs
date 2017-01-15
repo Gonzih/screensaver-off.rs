@@ -2,6 +2,7 @@ use std::fs;
 use std::os::unix::fs::PermissionsExt;
 use std::process::Command;
 use std::ffi::OsStr;
+use sysinfo;
 
 pub fn is_executable(path: &str) -> bool {
     let meta_maybe = fs::metadata(path);
@@ -43,7 +44,13 @@ impl<'a> Xscreensaver<'a> {
 
 impl<'a> Inhibitor for Xscreensaver<'a> {
     fn is_applicable(&self) -> bool {
-        is_executable(self.path)
+        let sys = sysinfo::System::new();
+        let procs = sys.get_process_list();
+        let xscreensaver_running = procs.iter().any(|(_, proc_)| {
+            proc_.name.starts_with("xscreensaver")
+        });
+
+        is_executable(self.path) && xscreensaver_running
     }
 
     fn disable(&self) {
