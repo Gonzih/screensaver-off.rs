@@ -18,20 +18,17 @@ pub fn is_executable(path: &str) -> bool {
 }
 
 fn exec<S: AsRef<OsStr>>(path: &str, args: &[S]) {
-    if is_executable(path) {
-        let status = Command::new(path).args(args).status();
-        match status {
-            Ok(v) => info!("Process {} exited with status {}", path, v),
-            Err(err) => warn!("Process {} exited with error \"{}\"", path, err),
-        }
-    } else {
-        warn!("{} is not executable!", path);
+    let status = Command::new(path).args(args).status();
+    match status {
+        Ok(v) => info!("Process {} exited with status {}", path, v),
+        Err(err) => warn!("Process {} exited with error \"{}\"", path, err),
     }
 }
 
 trait Inhibitor {
     fn disable(&self);
     fn enable(&self);
+    fn is_applicable(&self) -> bool;
 }
 
 struct Xscreensaver<'a> {
@@ -45,9 +42,15 @@ impl<'a> Xscreensaver<'a> {
 }
 
 impl<'a> Inhibitor for Xscreensaver<'a> {
+    fn is_applicable(&self) -> bool {
+        is_executable(self.path)
+    }
+
     fn disable(&self) {
-        info!("Disabling xscreensaver");
-        exec(self.path, &["-deactivate"]);
+        if self.is_applicable() {
+            info!("Disabling xscreensaver");
+            exec(self.path, &["-deactivate"]);
+        }
     }
 
     fn enable(&self) {}
@@ -64,14 +67,22 @@ impl<'a> Xset<'a> {
 }
 
 impl<'a> Inhibitor for Xset<'a> {
+    fn is_applicable(&self) -> bool {
+        is_executable(self.path)
+    }
+
     fn disable(&self) {
-        info!("Disabling Xorg DPMS and Screensaver");
-        exec(self.path, &["s", "off", "-dpms"]);
+        if self.is_applicable() {
+            info!("Disabling Xorg DPMS and Screensaver");
+            exec(self.path, &["s", "off", "-dpms"]);
+        }
     }
 
     fn enable(&self) {
-        info!("Enabling Xorg DPMS and Screensaver");
-        exec(self.path, &["s", "on", "+dpms"]);
+        if self.is_applicable() {
+            info!("Enabling Xorg DPMS and Screensaver");
+            exec(self.path, &["s", "on", "+dpms"]);
+        }
     }
 }
 
