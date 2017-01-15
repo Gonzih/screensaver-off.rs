@@ -16,6 +16,18 @@ pub fn is_executable(path: &str) -> bool {
     meta.is_file() && is_executable
 }
 
+fn exec(path: &str, arg: &str) {
+    if is_executable(path) {
+        let status = Command::new(path).arg(arg).status();
+        match status {
+            Ok(v) => info!("Process {} exited with status {}", path, v),
+            Err(err) => warn!("Process {} exited with error \"{}\"", path, err),
+        }
+    } else {
+        warn!("{} is not executable!", path);
+    }
+}
+
 trait Inhibitor {
     fn disable(&self);
     fn enable(&self);
@@ -34,15 +46,7 @@ impl<'a> Xscreensaver<'a> {
 impl<'a> Inhibitor for Xscreensaver<'a> {
     fn disable(&self) {
         info!("Disabling xscreensaver");
-        if is_executable(self.path) {
-            let status = Command::new(self.path).arg("-deactivate").status();
-            match status {
-                Ok(v) => info!("Process {} exited with status {}", self.path, v),
-                Err(err) => warn!("Process {} exited with error \"{}\"", self.path, err),
-            }
-        } else {
-            warn!("{} is not executable!", self.path)
-        }
+        exec(self.path, "-deactivate");
     }
 
     fn enable(&self) {}
@@ -61,28 +65,12 @@ impl<'a> Xset<'a> {
 impl<'a> Inhibitor for Xset<'a> {
     fn disable(&self) {
         info!("Disabling Xorg DPMS");
-        if is_executable(self.path) {
-            let status = Command::new(self.path).arg("-dpms").status();
-            match status {
-                Ok(v) => info!("Process {} exited with status {}", self.path, v),
-                Err(err) => warn!("Process {} exited with error \"{}\"", self.path, err),
-            }
-        } else {
-            warn!("{} is not executable!", self.path)
-        }
+        exec(self.path, "-dpms");
     }
 
     fn enable(&self) {
         info!("Enabling Xorg DPMS");
-        if is_executable(self.path) {
-            let status = Command::new(self.path).arg("+dpms").status();
-            match status {
-                Ok(v) => info!("Process {} exited with status {}", self.path, v),
-                Err(err) => warn!("Process {} exited with error \"{}\"", self.path, err),
-            }
-        } else {
-            warn!("{} is not executable!", self.path)
-        }
+        exec(self.path, "+dpms");
     }
 }
 
