@@ -1,6 +1,7 @@
 use std::fs;
 use std::os::unix::fs::PermissionsExt;
 use std::process::Command;
+use std::ffi::OsStr;
 
 pub fn is_executable(path: &str) -> bool {
     let meta_maybe = fs::metadata(path);
@@ -16,9 +17,9 @@ pub fn is_executable(path: &str) -> bool {
     meta.is_file() && is_executable
 }
 
-fn exec(path: &str, arg: &str) {
+fn exec<S: AsRef<OsStr>>(path: &str, args: &[S]) {
     if is_executable(path) {
-        let status = Command::new(path).arg(arg).status();
+        let status = Command::new(path).args(args).status();
         match status {
             Ok(v) => info!("Process {} exited with status {}", path, v),
             Err(err) => warn!("Process {} exited with error \"{}\"", path, err),
@@ -46,7 +47,7 @@ impl<'a> Xscreensaver<'a> {
 impl<'a> Inhibitor for Xscreensaver<'a> {
     fn disable(&self) {
         info!("Disabling xscreensaver");
-        exec(self.path, "-deactivate");
+        exec(self.path, &["-deactivate"]);
     }
 
     fn enable(&self) {}
@@ -64,13 +65,15 @@ impl<'a> Xset<'a> {
 
 impl<'a> Inhibitor for Xset<'a> {
     fn disable(&self) {
-        info!("Disabling Xorg DPMS");
-        exec(self.path, "-dpms");
+        info!("Disabling Xorg DPMS and Screensaver");
+        exec(self.path, &["-dpms"]);
+        exec(self.path, &["s", "off"]);
     }
 
     fn enable(&self) {
-        info!("Enabling Xorg DPMS");
-        exec(self.path, "+dpms");
+        info!("Enabling Xorg DPMS and Screensaver");
+        exec(self.path, &["+dpms"]);
+        exec(self.path, &["s", "on"]);
     }
 }
 
