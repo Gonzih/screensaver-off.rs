@@ -66,14 +66,12 @@ impl<'a> Xset<'a> {
 impl<'a> Inhibitor for Xset<'a> {
     fn disable(&self) {
         info!("Disabling Xorg DPMS and Screensaver");
-        exec(self.path, &["-dpms"]);
-        exec(self.path, &["s", "off"]);
+        exec(self.path, &["s", "off", "-dpms"]);
     }
 
     fn enable(&self) {
         info!("Enabling Xorg DPMS and Screensaver");
-        exec(self.path, &["+dpms"]);
-        exec(self.path, &["s", "on"]);
+        exec(self.path, &["s", "on", "+dpms"]);
     }
 }
 
