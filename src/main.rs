@@ -62,18 +62,23 @@ fn check_and_disable(state: &Arc<Mutex<AppState>>) {
         let sys = sysinfo::System::new();
         let procs = sys.get_process_list();
         let regs = read_config();
-        state.automatically_triggered = false;
 
-        'outer: for (pid, proc_) in procs {
-            for reg in &regs {
+        let should_auto_disable = procs.iter().any(|(pid, proc_)| {
+            regs.iter().any(|reg|{
                 let pname = proc_.name.as_str();
-                if reg.is_match(pname) {
+                let is_match = reg.is_match(pname);
+                if is_match {
                     info!("Found matching process {} {}", pid, pname);
-                    disable_all();
-                    state.automatically_triggered = true;
-                    return;
                 }
-            }
+
+                is_match
+            })
+        });
+
+        state.automatically_triggered = should_auto_disable;
+
+        if should_auto_disable {
+            disable_all();
         }
     }
 
