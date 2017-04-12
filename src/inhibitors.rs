@@ -38,7 +38,7 @@ struct Xscreensaver<'a> {
 
 impl<'a> Xscreensaver<'a> {
     fn new() -> Xscreensaver<'a> {
-        Xscreensaver { path: "/usr/bin/xscreensaver-command"}
+        Xscreensaver { path: "/usr/bin/xscreensaver-command" }
     }
 }
 
@@ -46,9 +46,8 @@ impl<'a> Inhibitor for Xscreensaver<'a> {
     fn is_applicable(&self) -> bool {
         let sys = sysinfo::System::new();
         let procs = sys.get_process_list();
-        let xscreensaver_running = procs.iter().any(|(_, proc_)| {
-            proc_.name.starts_with("xscreensaver")
-        });
+        let xscreensaver_running =
+            procs.iter().any(|(_, proc_)| proc_.name.starts_with("xscreensaver"));
 
         is_executable(self.path) && xscreensaver_running
     }

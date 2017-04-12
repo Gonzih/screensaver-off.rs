@@ -43,9 +43,9 @@ fn read_config() -> Vec<Regex> {
 
         buf.lines()
             .map(|line| {
-                let line = line.unwrap();
-                Regex::new(&line).unwrap()
-            })
+                     let line = line.unwrap();
+                     Regex::new(&line).unwrap()
+                 })
             .collect()
     }
 }
@@ -64,7 +64,7 @@ fn check_and_disable(state: &Arc<Mutex<AppState>>) {
         let regs = read_config();
 
         let should_auto_disable = procs.iter().any(|(pid, proc_)| {
-            regs.iter().any(|reg|{
+            regs.iter().any(|reg| {
                 let pname = proc_.name.as_str();
                 let is_match = reg.is_match(pname);
                 if is_match {
@@ -97,10 +97,10 @@ fn configure_icon(state: Arc<Mutex<AppState>>, icon: &StatusIcon) {
     icon.set_visible(true);
 
     icon.connect_activate(move |i| {
-        let mut state = state.lock().unwrap();
-        state.manually_triggered = !state.manually_triggered;
-        adjust_icon_pic(&state, &i);
-    });
+                              let mut state = state.lock().unwrap();
+                              state.manually_triggered = !state.manually_triggered;
+                              adjust_icon_pic(&state, &i);
+                          });
 
 }
 
@@ -122,9 +122,9 @@ fn main() {
     }
 
     let shared_state = Arc::new(Mutex::new(AppState {
-        manually_triggered: false,
-        automatically_triggered: false,
-    }));
+                                               manually_triggered: false,
+                                               automatically_triggered: false,
+                                           }));
 
     let icon = StatusIcon::new_from_icon_name(INACTIVE_ICON);
 
@@ -132,9 +132,7 @@ fn main() {
     configure_icon(state1, &icon);
 
     let state2 = shared_state.clone();
-    thread::spawn(move || {
-        start_monitoring_loop(state2);
-    });
+    thread::spawn(move || { start_monitoring_loop(state2); });
 
     let state3 = shared_state.clone();
     gtk::timeout_add_seconds(1, move || {
