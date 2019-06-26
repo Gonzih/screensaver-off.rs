@@ -1,4 +1,4 @@
-FROM base/archlinux
+FROM archlinux/base
 MAINTAINER Max Gonzih <gonzih at gmail dot com>
 
 RUN pacman -Sy archlinux-keyring pacman --noconfirm

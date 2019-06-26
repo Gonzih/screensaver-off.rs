@@ -1,12 +1,12 @@
-#[macro_use]
 extern crate log;
 extern crate env_logger;
 extern crate regex;
 extern crate gtk;
 extern crate sysinfo;
+extern crate dirs;
 
 use regex::Regex;
-use std::env::home_dir;
+use dirs::home_dir;
 use std::fs::File;
 use std::io::{BufReader, BufRead};
 use std::thread::sleep;
@@ -15,6 +15,8 @@ use gtk::prelude::*;
 use gtk::StatusIcon;
 use std::sync::{Arc, Mutex};
 use std::thread;
+use log::{info};
+use sysinfo::{System, SystemExt};
 
 mod inhibitors;
 
@@ -59,7 +61,7 @@ fn check_and_disable(state: &Arc<Mutex<AppState>>) {
         disable_all();
         return;
     } else {
-        let sys = sysinfo::System::new();
+        let sys = System::new();
         let procs = sys.get_process_list();
         let regs = read_config();
 
@@ -115,7 +117,7 @@ fn adjust_icon_pic(state: &AppState, icon: &StatusIcon) {
 }
 
 fn main() {
-    env_logger::init().unwrap();
+    env_logger::init();
 
     if gtk::init().is_err() {
         panic!("Failed to initialize GTK!");
