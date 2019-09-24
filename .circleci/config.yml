@@ -5,6 +5,7 @@ jobs:
       - image: debian:stretch
 
     steps:
+      - setup_remote_docker
       - checkout
       - run:
           name: CI
