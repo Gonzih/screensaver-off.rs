@@ -8,4 +8,4 @@ jobs:
       - run: nix-channel --add https://nixos.org/channels/nixpkgs-unstable nixpkgs
       - run: nix-channel --update
       - run: nix-env -i cmake rustup
-      - run: make ci
+      - run: make rust-setup ci
