@@ -1,11 +1,10 @@
-FROM archlinux/base
+FROM nixos/nix
 
 MAINTAINER Max Gonzih <gonzih at gmail dot com>
 
-RUN pacman -Sy archlinux-keyring pacman --noconfirm
-RUN pacman-db-upgrade
-RUN pacman -Su --noconfirm
-RUN pacman -S gcc rustup cargo make gtk3 --noconfirm
+RUN nix-channel --add https://nixos.org/channels/nixpkgs-unstable nixpkgs
+RUN nix-channel --update
+RUN nix-env -i gnumake rustup
 RUN rustup default nightly
 
 WORKDIR /code
