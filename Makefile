@@ -1,7 +1,7 @@
 build:
 	cargo build --release
 run:
-	cargo run
+	nix-shell shell.nix --run 'cargo run'
 rust-setup:
 	rustup default nightly
 ci:
