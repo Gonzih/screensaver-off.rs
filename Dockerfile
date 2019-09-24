@@ -1,8 +1,11 @@
 FROM archlinux/base
+
 MAINTAINER Max Gonzih <gonzih at gmail dot com>
 
 RUN pacman -Sy archlinux-keyring pacman --noconfirm
 RUN pacman-db-upgrade
 RUN pacman -Su --noconfirm
 RUN pacman -S gcc rustup cargo make gtk3 --noconfirm
-RUN rustup default stable
+RUN rustup default nightly
+
+WORKDIR /code
