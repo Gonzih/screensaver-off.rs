@@ -1,7 +1,5 @@
-extern crate sh;
-
-use crate::sh::{exec, is_executable};
-use log::{info, warn};
+use super::sh::{exec, is_executable};
+use log::{info};
 
 const PATH: &str = "xset";
 

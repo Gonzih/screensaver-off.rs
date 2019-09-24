@@ -16,7 +16,7 @@ use gtk::StatusIcon;
 use std::sync::{Arc, Mutex};
 use std::thread;
 use log::{info};
-use sysinfo::{System, SystemExt};
+use sysinfo::{System, ProcessExt, SystemExt};
 
 mod inhibitors;
 
@@ -61,13 +61,14 @@ fn check_and_disable(state: &Arc<Mutex<AppState>>) {
         disable_all();
         return;
     } else {
-        let sys = System::new();
+        let mut sys = System::new();
+        sys.refresh_processes();
         let procs = sys.get_process_list();
         let regs = read_config();
 
         let should_auto_disable = procs.iter().any(|(pid, proc_)| {
             regs.iter().any(|reg| {
-                let pname = proc_.name.as_str();
+                let pname = proc_.name();
                 let is_match = reg.is_match(pname);
                 if is_match {
                     info!("Found matching process {} {}", pid, pname);

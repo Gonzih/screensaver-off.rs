@@ -1,5 +1,6 @@
 mod xscreensaver;
 mod xset;
+mod sh;
 
 pub fn disable_all() {
     xscreensaver::disable();

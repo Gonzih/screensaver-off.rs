@@ -1,17 +1,16 @@
-extern crate sh;
-
-use crate::sh::{exec, is_executable};
-use log::{info, warn};
-use sysinfo;
+use super::sh::{exec, is_executable};
+use log::{info};
+use sysinfo::{System, ProcessExt, SystemExt};
 
 const PATH: &str = "xscreensaver";
 
 fn is_applicable() -> bool {
-    let sys = sysinfo::System::new();
+    let mut sys = sysinfo::System::new();
+    sys.refresh_processes();
     let procs = sys.get_process_list();
     let xscreensaver_running = procs
         .iter()
-        .any(|(_, proc_)| proc_.name.starts_with("xscreensaver"));
+        .any(|(_, proc_)| proc_.name().starts_with("xscreensaver"));
 
     is_executable(PATH) && xscreensaver_running
 }
