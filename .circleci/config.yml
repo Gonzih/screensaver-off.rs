@@ -2,10 +2,9 @@ version: 2
 jobs:
   build:
     docker:
-      - image: circleci/rust:latest
-
+      - image: nixos/nix
     steps:
       - checkout
-      - run: sudo apt-get update
-      - run: sudo apt-get -y install libatk1.0-dev libpango1.0-dev libgtk-3-dev
-      - run: make build
+      - run: nix-channel --add https://nixos.org/channels/nixpkgs-unstable nixpkgs
+      - run: nix-channel --update
+      - run: make ci
