@@ -1,8 +1,7 @@
 mod sh;
 
-use self::sh::{exec, is_executable};
+use crate::sh::{exec, is_executable};
 use log::{info, warn};
-
 use sysinfo;
 
 const PATH: &str = "xscreensaver";
