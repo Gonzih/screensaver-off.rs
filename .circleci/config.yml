@@ -6,4 +6,6 @@ jobs:
 
     steps:
       - checkout
+      - run: apt-get update
+      - run: apt-get -y install libatk1.0-dev libpango1.0-dev
       - run: make build
