@@ -1,5 +1,3 @@
-mod sh;
-
 use crate::sh::{exec, is_executable};
 use log::{info, warn};
 
