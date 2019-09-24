@@ -5,7 +5,6 @@ jobs:
       - image: nixos/nix
     steps:
       - checkout
-      - echo "export PATH=$GOPATH/bin:$PATH" >> $BASH_ENV
       - run: nix-channel --add https://nixos.org/channels/nixpkgs-unstable nixos
       - run: nix-channel --update
       - run: nix-env -i gnumake rustup
