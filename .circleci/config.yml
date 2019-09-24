@@ -6,4 +6,4 @@ jobs:
 
     steps:
       - checkout
-      - command: make build
+      - run: make build
