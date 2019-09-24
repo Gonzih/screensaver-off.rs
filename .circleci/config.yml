@@ -7,5 +7,5 @@ jobs:
     steps:
       - checkout
       - run: sudo apt-get update
-      - run: sudo apt-get -y install libatk1.0-dev libpango1.0-dev
+      - run: sudo apt-get -y install libatk1.0-dev libpango1.0-dev libgtk-3-dev
       - run: make build
