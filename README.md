@@ -1,4 +1,5 @@
 # Something like caffeine-ng with less functionality (at least for now)
+[![CircleCI](https://circleci.com/gh/Gonzih/screensaver-off.rs.svg?style=svg)](https://circleci.com/gh/Gonzih/screensaver-off.rs)
 
 ## Building
 
