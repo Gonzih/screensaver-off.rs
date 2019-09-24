@@ -7,5 +7,5 @@ jobs:
       - checkout
       - run: nix-channel --add https://nixos.org/channels/nixpkgs-unstable nixpkgs
       - run: nix-channel --update
-      - run: nix-env -i nixos.cmake nixos.rustup
+      - run: nix-env -i cmake rustup
       - run: make ci
