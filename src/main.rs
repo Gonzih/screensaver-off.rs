@@ -1,22 +1,22 @@
-extern crate log;
-extern crate env_logger;
-extern crate regex;
-extern crate gtk;
-extern crate sysinfo;
 extern crate dirs;
+extern crate env_logger;
+extern crate gtk;
+extern crate log;
+extern crate regex;
+extern crate sysinfo;
 
-use regex::Regex;
 use dirs::home_dir;
-use std::fs::File;
-use std::io::{BufReader, BufRead};
-use std::thread::sleep;
-use std::time::Duration;
 use gtk::prelude::*;
 use gtk::StatusIcon;
+use log::info;
+use regex::Regex;
+use std::fs::File;
+use std::io::{BufRead, BufReader};
 use std::sync::{Arc, Mutex};
 use std::thread;
-use log::{info};
-use sysinfo::{System, ProcessExt, SystemExt};
+use std::thread::sleep;
+use std::time::Duration;
+use sysinfo::{ProcessExt, System, SystemExt};
 
 mod inhibitors;
 
@@ -45,43 +45,49 @@ fn read_config() -> Vec<Regex> {
 
         buf.lines()
             .map(|line| {
-                     let line = line.unwrap();
-                     Regex::new(&line).unwrap()
-                 })
+                let line = line.unwrap();
+                Regex::new(&line).unwrap()
+            })
             .collect()
     }
+}
+
+fn should_auto_disable() -> bool {
+    let mut sys = System::new();
+    sys.refresh_processes();
+    let procs = sys.get_process_list();
+    let regs = read_config();
+
+    procs.iter().any(|(pid, proc_)| {
+        regs.iter().any(|reg| {
+            let pname = proc_.name();
+            let is_match = reg.is_match(pname);
+            if is_match {
+                info!("Found matching process {} {}", pid, pname);
+            }
+
+            is_match
+        })
+    })
 }
 
 fn check_and_disable(state: &Arc<Mutex<AppState>>) {
     let mut state = state.lock().unwrap();
 
     if state.manually_triggered {
-        info!("Disabling screensaver because forced by global state which is {:?}",
-              *state);
+        info!(
+            "Disabling screensaver because forced by global state which is {:?}",
+            *state
+        );
         disable_all();
         return;
     } else {
-        let mut sys = System::new();
-        sys.refresh_processes();
-        let procs = sys.get_process_list();
-        let regs = read_config();
+        let auto_disable = should_auto_disable();
+        state.automatically_triggered = auto_disable;
 
-        let should_auto_disable = procs.iter().any(|(pid, proc_)| {
-            regs.iter().any(|reg| {
-                let pname = proc_.name();
-                let is_match = reg.is_match(pname);
-                if is_match {
-                    info!("Found matching process {} {}", pid, pname);
-                }
-
-                is_match
-            })
-        });
-
-        state.automatically_triggered = should_auto_disable;
-
-        if should_auto_disable {
+        if auto_disable {
             disable_all();
+            return;
         }
     }
 
@@ -100,11 +106,10 @@ fn configure_icon(state: Arc<Mutex<AppState>>, icon: &StatusIcon) {
     icon.set_visible(true);
 
     icon.connect_activate(move |i| {
-                              let mut state = state.lock().unwrap();
-                              state.manually_triggered = !state.manually_triggered;
-                              adjust_icon_pic(&state, &i);
-                          });
-
+        let mut state = state.lock().unwrap();
+        state.manually_triggered = !state.manually_triggered;
+        adjust_icon_pic(&state, &i);
+    });
 }
 
 fn adjust_icon_pic(state: &AppState, icon: &StatusIcon) {
@@ -125,21 +130,23 @@ fn main() {
     }
 
     let shared_state = Arc::new(Mutex::new(AppState {
-                                               manually_triggered: false,
-                                               automatically_triggered: false,
-                                           }));
+        manually_triggered: false,
+        automatically_triggered: false,
+    }));
 
     let icon = StatusIcon::new_from_icon_name(INACTIVE_ICON);
 
-    let state1 = shared_state.clone();
-    configure_icon(state1, &icon);
+    let state = shared_state.clone();
+    configure_icon(state, &icon);
 
-    let state2 = shared_state.clone();
-    thread::spawn(move || { start_monitoring_loop(state2); });
+    let state = shared_state.clone();
+    thread::spawn(move || {
+        start_monitoring_loop(state);
+    });
 
-    let state3 = shared_state.clone();
-    gtk::timeout_add_seconds(1, move || {
-        let state = state3.lock().unwrap();
+    let state = shared_state.clone();
+    gtk::timeout_add_seconds(10, move || {
+        let state = state.lock().unwrap();
         adjust_icon_pic(&state, &icon);
         Continue(true)
     });
