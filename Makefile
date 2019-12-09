@@ -1,5 +1,5 @@
 build:
-	cargo build --release
+	cargo build
 run:
 	nix-shell shell.nix --run 'cargo run'
 rust-setup:
