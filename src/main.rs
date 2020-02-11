@@ -53,9 +53,9 @@ fn read_config() -> Vec<Regex> {
 }
 
 fn should_auto_disable() -> bool {
-    let mut sys = System::new();
+    let mut sys = System::new_all();
     sys.refresh_processes();
-    let procs = sys.get_process_list();
+    let procs = sys.get_processes();
     let regs = read_config();
 
     procs.iter().any(|(pid, proc_)| {
