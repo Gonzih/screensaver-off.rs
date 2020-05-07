@@ -4,7 +4,7 @@ version = "0.0.6"
 authors = ["Max Gonzih <gonzih@gmail.com>"]
 
 [dependencies]
-sysinfo = "0.13.3"
+sysinfo = "0.14.1"
 log = "0.4.10"
 env_logger = "0.7.1"
 regex = "*"
