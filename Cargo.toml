@@ -6,7 +6,7 @@ authors = ["Max Gonzih <gonzih@gmail.com>"]
 [dependencies]
 sysinfo = "0.14.7"
 log = "0.4.10"
-env_logger = "0.7.1"
+env_logger = "0.8.1"
 regex = "*"
 dirs = "3.0.0"
 
