@@ -474,9 +474,9 @@ checksum = "6281b86796ba5e4366000be6e9e18bf35580adf9e63fbe2294aadb587613a319"
 
 [[package]]
 name = "log"
-version = "0.4.10"
+version = "0.4.11"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1b9ad466a945c9c40f6f9a449c55675547e59bc75a2722d4689042ab3ae80c9c"
+checksum = "4fabed175da42fed1fa0746b0ea71f412aa9d35e76e95e59b192c64b9dc2bf8b"
 dependencies = [
  "cfg-if 0.1.9",
 ]

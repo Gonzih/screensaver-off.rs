@@ -5,11 +5,11 @@ authors = ["Max Gonzih <gonzih@gmail.com>"]
 
 [dependencies]
 sysinfo = "0.14.7"
-log = "0.4.10"
-femme = "2.1.1"
+log = "0.4.11"
+femme = "2"
 anyhow = "1"
 regex = "*"
-dirs = "3.0.0"
+dirs = "3"
 
 [dependencies.gtk]
 version = "0.5.0"
