@@ -1,9 +1,9 @@
 extern crate dirs;
-extern crate env_logger;
 extern crate gtk;
 extern crate log;
 extern crate regex;
 extern crate sysinfo;
+extern crate anyhow;
 
 use dirs::home_dir;
 use gtk::prelude::*;
@@ -17,8 +17,10 @@ use std::thread;
 use std::thread::sleep;
 use std::time::Duration;
 use sysinfo::{ProcessExt, System, SystemExt};
+use anyhow::Result;
 
 mod inhibitors;
+mod debug;
 
 use inhibitors::{disable_all, enable_all};
 
@@ -122,12 +124,10 @@ fn adjust_icon_pic(state: &AppState, icon: &StatusIcon) {
     }
 }
 
-fn main() {
-    env_logger::init();
+fn main() -> Result<()> {
+    debug::enable_logging();
 
-    if gtk::init().is_err() {
-        panic!("Failed to initialize GTK!");
-    }
+    gtk::init()?;
 
     let shared_state = Arc::new(Mutex::new(AppState {
         manually_triggered: false,
@@ -152,4 +152,6 @@ fn main() {
     });
 
     gtk::main();
+
+    Ok(())
 }

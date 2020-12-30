@@ -1,5 +1,5 @@
 use super::sh::{exec, is_executable};
-use log::{info};
+use log::info;
 
 const PATH: &str = "xset";
 

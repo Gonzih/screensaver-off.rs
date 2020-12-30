@@ -1,6 +1,6 @@
 use super::sh::{exec, is_executable};
 use log::info;
-use sysinfo::{ProcessExt, System, SystemExt};
+use sysinfo::{ProcessExt, SystemExt};
 
 const PATH: &str = "xscreensaver";
 

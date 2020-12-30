@@ -8,6 +8,6 @@ pub fn disable_all() {
 }
 
 pub fn enable_all() {
-    xscreensaver::disable();
-    xset::disable();
+    xscreensaver::enable();
+    xset::enable();
 }
