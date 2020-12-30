@@ -2,12 +2,18 @@ mod xscreensaver;
 mod xset;
 mod sh;
 
-pub fn disable_all() {
-    xscreensaver::disable();
-    xset::disable();
+use anyhow::Result;
+
+pub fn disable_all() -> Result<()> {
+    xscreensaver::disable()?;
+    xset::disable()?;
+
+    Ok(())
 }
 
-pub fn enable_all() {
-    xscreensaver::enable();
-    xset::enable();
+pub fn enable_all() -> Result<()> {
+    xscreensaver::enable()?;
+    xset::enable()?;
+
+    Ok(())
 }

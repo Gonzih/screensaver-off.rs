@@ -81,19 +81,19 @@ fn check_and_disable(state: &Arc<Mutex<AppState>>) {
             "Disabling screensaver because forced by global state which is {:?}",
             *state
         );
-        disable_all();
+        disable_all().expect("Could not disable screensavers");
         return;
     } else {
         let auto_disable = should_auto_disable();
         state.automatically_triggered = auto_disable;
 
         if auto_disable {
-            disable_all();
+            disable_all().expect("Could not disable screensavers");
             return;
         }
     }
 
-    enable_all();
+    enable_all().expect("Could not enable screensavers");
 }
 
 fn start_monitoring_loop(state: Arc<Mutex<AppState>>) {

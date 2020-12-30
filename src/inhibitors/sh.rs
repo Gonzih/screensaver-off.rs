@@ -1,8 +1,8 @@
 use std::fs;
 use std::os::unix::fs::PermissionsExt;
-use std::process::Command;
+use std::process::{Command, ExitStatus};
 use std::ffi::OsStr;
-use log::{info, warn};
+use anyhow::Result;
 
 pub fn is_executable(path: &str) -> bool {
     let meta_maybe = fs::metadata(path);
@@ -18,10 +18,7 @@ pub fn is_executable(path: &str) -> bool {
     meta.is_file() && is_executable
 }
 
-pub fn exec<S: AsRef<OsStr>>(path: &str, args: &[S]) {
-    let status = Command::new(path).args(args).status();
-    match status {
-        Ok(v) => info!("Process {} exited with status {}", path, v),
-        Err(err) => warn!("Process {} exited with error \"{}\"", path, err),
-    }
+pub fn exec<S: AsRef<OsStr>>(path: &str, args: &[S]) -> Result<ExitStatus> {
+    let status = Command::new(path).args(args).status()?;
+    Ok(status)
 }
