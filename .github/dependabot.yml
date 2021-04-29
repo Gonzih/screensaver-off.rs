@@ -1,0 +1,15 @@
+version: 2
+updates:
+- package-ecosystem: cargo
+  directory: "/"
+  schedule:
+    interval: monthly
+    time: "10:00"
+  open-pull-requests-limit: 10
+  ignore:
+  - dependency-name: gtk
+    versions:
+    - "> 0.5.0"
+  - dependency-name: anyhow
+    versions:
+    - 1.0.38
