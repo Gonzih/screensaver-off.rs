@@ -4,7 +4,7 @@ version = "0.0.6"
 authors = ["Max Gonzih <gonzih@gmail.com>"]
 
 [dependencies]
-sysinfo = "0.17.2"
+sysinfo = "0.19.0"
 log = "0.4.14"
 femme = "2"
 anyhow = "1"
