@@ -9,7 +9,7 @@ log = "0.4.14"
 femme = "2"
 anyhow = "1"
 regex = "*"
-dirs = "3"
+dirs = "4"
 
 [dependencies.gtk]
 version = "0.5.0"
